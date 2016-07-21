@@ -1,6 +1,7 @@
 # -*- coding:utf-8 -*-
 #author:hjd
 import subprocess,ConfigParser,re,json,paramiko
+from threading import Thread
 from core import sendto,ssh
 def bbptmadmin(result,websugarurl,host):
     for i in xrange(len(result)):
@@ -48,7 +49,7 @@ def pqtmadmin(result,websugarurl,host):
     sendhandle = sendto.sendtowebsugar(websugarurl)
     for i in result:
         i=i.split()
-        tempkey='_'.join([i[0],i[1],i[6]])
+        tempkey='|'.join([i[0],i[1],i[6]])
         keys["data"].append({'{#T_Q_NAME}':tempkey})
         for num in xrange(3,6):
             if i[num]=='-':
@@ -66,7 +67,7 @@ def psctmadmin(result,websugarurl,host):
     sendhandle = sendto.sendtowebsugar(websugarurl)
     for i in result:
         i=i.split()
-        tempkey='_'.join([i[0],i[1],i[3],i[4]])
+        tempkey='|'.join([i[0],i[1],i[3],i[4]])
         keys["data"].append({'{#TUXEDOIDNAME}':tempkey})
         sendhandle.send(host,'done_[{}]'.format(tempkey),int(i[6]))
         if i[7]=='AVAIL':
@@ -127,7 +128,13 @@ def checktuxedo(conf_path):
         host=hosts.split(',')[0]
         localcheck(host,websugarurl)
     else:
+        T_list=[]
         for host in hosts.split(','):
-            remotecheck(host,websugarurl,user,passwd,ip,port)
+            T = Thread(target=remotecheck, args=(host,websugarurl,user,passwd,ip,port,))
+            T.start()
+            T_list.append(T)
+            # remotecheck(host,websugarurl,user,passwd,ip,port)
+        for T in T_list:
+            T.join()
 
 

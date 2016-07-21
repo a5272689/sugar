@@ -5,7 +5,7 @@ from multiprocessing import Process,freeze_support
 from apscheduler.schedulers.blocking import BlockingScheduler
 base_path=os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.append(base_path)
-from core import checkhost,checkurl,checkJVM,tuxedobbix,orapybbix,mysqlbbix
+from core import checkhost,checkurl,checkJboss,tuxedobbix,orapybbix,mysqlbbix,checkWeblogic
 conf_path=os.path.join(os.path.join(base_path,'conf'),'sugar.ini')
 log_path=os.path.join(os.path.join(base_path,'log'),'sugar.log')
 sugarconf=ConfigParser.ConfigParser()
@@ -61,11 +61,16 @@ if __name__ == '__main__':
         checkurl_P=Process(target=cronsleep, args=(checkurl.checkHTTP,sleeptime,(conf_path,),),name='checkurl')
         checkurl_P.start()
         P_list.append(checkurl_P)
-    if sugarconf.get('switch','checkJVM') == 'on':
-        sleeptime=int(sugarconf.get('checkJVMservers','sleeptime'))
-        checkJVM_P=Process(target=cronsleep, args=(checkJVM.checkjava,sleeptime,(conf_path,),),name='checkJVM')
-        checkJVM_P.start()
-        P_list.append(checkJVM_P)
+    if sugarconf.get('switch','checkJboss') == 'on':
+        sleeptime=int(sugarconf.get('checkJbossServers','sleeptime'))
+        checkJboss_P=Process(target=cronsleep, args=(checkJboss.checkjava, sleeptime, (conf_path,),), name='checkJboss')
+        checkJboss_P.start()
+        P_list.append(checkJboss_P)
+    if sugarconf.get('switch','checkWeblogic') == 'on':
+        sleeptime=int(sugarconf.get('checkWeblogicServers','sleeptime'))
+        checkWeblogic_P=Process(target=cronsleep, args=(checkWeblogic.checkjava, sleeptime, (conf_path,),), name='checkWeblogic')
+        checkWeblogic_P.start()
+        P_list.append(checkWeblogic_P)
     if sugarconf.get('switch','tuxedopybbix') == 'on':
         sleeptime=int(sugarconf.get('tuxedopybbixservers','sleeptime'))
         tuxedopybbix_P=Process(target=cronsleep, args=(tuxedobbix.checktuxedo,sleeptime,(conf_path,),),name='tuxedopybbix')
